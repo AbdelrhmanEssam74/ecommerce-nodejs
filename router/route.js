@@ -6,6 +6,7 @@ const ShippingController = require('../Controllers/shippingController')
 const CheckoutController = require('../Controllers/checkoutController')
 const paypalController = require('../Controllers/paypalController');
 const orderController = require('../Controllers/orderController')
+const reviewController = require('../Controllers/reviewController')
 
 router.post('/address', AddressController.address);
 router.get('/address/:userId', AddressController.getAddress);
@@ -18,4 +19,7 @@ router.post('/paypal/create-order', paypalController.createPayPalOrder);
 
 router.get('/orders/:userId', orderController.getSpecificOrders)
 router.get('/order/:orderId', orderController.getOrderDetails);
+
+router.post('/reviews',reviewController.addReview)
+router.get('/reviews/:productId' , reviewController.getProductReviews)
 module.exports = router;
