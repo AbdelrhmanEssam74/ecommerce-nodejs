@@ -27,12 +27,10 @@ exports.address = async (req, res) => {
 }
 exports.getAddress= async (req ,res)=>{
     const userId  = req.params.userId
-    console.log(userId)
     try {
         const [rows] = await db.query(`SELECT * FROM addresses WHERE user_id = ?`, [userId]);
-        res.json(rows);
+        return res.json(rows);
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'Error fetching addresses' });
+        return  res.status(500).json({ error: 'Error fetching addresses' });
     }
 }
