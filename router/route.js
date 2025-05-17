@@ -7,6 +7,7 @@ const CheckoutController = require('../Controllers/checkoutController')
 const paypalController = require('../Controllers/paypalController');
 const orderController = require('../Controllers/orderController')
 const reviewController = require('../Controllers/reviewController')
+const productController = require('../Controllers/searchController');
 
 router.post('/address', AddressController.address);
 router.get('/address/:userId', AddressController.getAddress);
@@ -22,4 +23,6 @@ router.get('/order/:orderId', orderController.getOrderDetails);
 
 router.post('/reviews',reviewController.addReview)
 router.get('/reviews/:productId' , reviewController.getProductReviews)
+
+router.get('/products/search', productController.searchProducts);
 module.exports = router;
