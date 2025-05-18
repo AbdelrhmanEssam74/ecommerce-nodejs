@@ -9,7 +9,15 @@ const paypalController = require('../Controllers/paypalController');
 const orderController = require('../Controllers/orderController')
 const reviewController = require('../Controllers/reviewController')
 const productController = require('../Controllers/searchController');
-
+// ***********************
+const authenticationAndAuthorizationControllers=require('../Controllers/authenticationAndAuthorization');
+const dashboardControllers=require('../Controllers/dashboard')
+const productsController=require('../Controllers/products')
+const cartItemsControllers=require('../Controllers/cartItems')
+const getWishlistItemsControllers=require('../Controllers/wishList')
+const ordersConterollers=require('../Controllers/orders')
+const profileControllers=require('../Controllers/profile')
+// ****************
 router.get('/', HomeController.home)
 
 router.post('/address', AddressController.address);
@@ -28,4 +36,43 @@ router.post('/reviews', reviewController.addReview)
 router.get('/reviews/:productId', reviewController.getProductReviews)
 
 router.get('/products/search', productController.searchProducts);
+
+
+// ***************************************
+router.post('/login',authenticationAndAuthorizationControllers.loginFunction)
+router.post('/register',authenticationAndAuthorizationControllers.registerFunction)
+router.post('/forget-pass',authenticationAndAuthorizationControllers.forgetPassFunction)
+router.put('/reset-pass',authenticationAndAuthorizationControllers.resetPassFunction)
+router.get('/dashboard',authMiddleware,checkAuthorize,dashboardControllers.getDashboard)
+router.get('/profile',authenticationAndAuthorizationControllers.getProfile)
+
+
+router.post('/products',productsController.addProductFunction)
+router.post('/product-images',productsController.addProductImages)
+router.get('/filtered-products',productsController.filteringProducts)
+router.get('/product/:id',productsController.selctingProductWithItsId)
+
+
+router.get('/cartItems/:uid',cartItemsControllers.getCartItems)
+router.post('/cartItems',cartItemsControllers.addItemToCart)
+router.delete('/cartItemsDelete/:itemid',cartItemsControllers.deleteFromCart)
+router.put('/cartItems/increase/:productid',cartItemsControllers.updateCart)
+
+
+router.get('/wishlist/:uid',getWishlistItemsControllers.getWishlistItems)
+router.post('/wishlist',getWishlistItemsControllers.addItemToWishList)
+router.delete('/wishlistDelete/:itemid',getWishlistItemsControllers.removeItemFromWishList)
+
+
+router.get('/orders',ordersConterollers.getALlOrders)
+router.delete('/orders/:uid',ordersConterollers.deletelOrder)
+router.patch('/orders/:id/address',ordersConterollers.editOrdershippingAddress)
+router.patch('/orders/:id/option',ordersConterollers.editOrdershippingOption)
+router.patch('/orders/:id/paymentmethod',ordersConterollers.updateOrderPaymentMethod)
+router.delete('/orders/:id/delete',ordersConterollers.cancelOrder)
+
+
+router.patch('/profile/update',profileControllers.updateProfile)
+router.delete('/profile/delete',profileControllers.deleteAccount)
+// ******************************************
 module.exports = router;
