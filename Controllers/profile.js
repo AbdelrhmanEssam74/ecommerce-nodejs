@@ -8,7 +8,7 @@ exports.updateProfile=async(req, res) => {
     await db.query(updateProfileQuery, [name, email, password, phone, req.session.user.id], (err, results) => {
         if (err) {
             console.error(err);
-            return res.send("Error occurred");
+            return res.status(500).send("Error occurred");
         }
         if (results.affectedRows > 0) {
             res.send("Updated successfully 🎉");

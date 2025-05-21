@@ -8,7 +8,7 @@ exports.loginFunction= async (req,res)=>{
     await db.query(sql,[email,password],(err,results)=>{
         if(err){ 
             console.error(err)
-            return res.status().send("error occured")
+            return res.status(500).send("error occured")
         }
         
         if(results.length>0){
@@ -29,7 +29,7 @@ exports.registerFunction=async (req,res)=>{
 
     const sqlCheck=`select * from usertest where email=?`
     await db.query(sqlCheck,[email],(err,results)=>{
-        if(err) return res.send("error occured")
+        if(err) return res.status(500).send("error occured")
         
         if(results.length>0){
             return res.status(403).send("email alreasy registered")
@@ -55,7 +55,7 @@ exports.forgetPassFunction=async (req,res)=>{
 
     const sqlcheckPass='select * from usertest where email=?'
     await db.query(sqlcheckPass,[email],(err,results)=>{
-        if(err) return res.send("email not found")
+        if(err) return res.status(500).send("email not found")
         
         if(results.length==0){
              return res.status(404).send('this email is not registered before')
@@ -72,7 +72,7 @@ exports.forgetPassFunction=async (req,res)=>{
     const sqlUpdate='update usertest set password=? where email=?'
 
     await db.query(sqlUpdate,[newpassword,email],(err,results)=>{
-        if(err) return res.send("error occured!")
+        if(err) return res.status(500).send("error occured!")
         
         if(results.affectedRows===0){
             res.status(404).send ('error resetting password')

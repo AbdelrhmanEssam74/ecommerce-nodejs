@@ -7,7 +7,7 @@ const userId=req.params.uid;
     await db.query(cartGetQuery,[userId],(err,results)=>{
         if(err) {
             console.error(err) 
-            return res.send("Error retrieve")
+            return res.status(500).send("Error retrieve")
         }
             res.json({
                 message:`retrieved successfully! 🎉 cartitems for user id ${userId}`,
@@ -23,7 +23,7 @@ exports.addItemToCart=async(req,res)=>{
     await db.query(cartGetQuery,[user_id,product_id ,quantity ,created_at,updated_at],(err,results)=>{
         if(err) {
             console.error(err) 
-            return res.send("Error adding")
+            return res.status(500).send("Error adding")
         }
         if(results.affectedRows >0){
             res.send("Added to cart successfully! 🎉")
@@ -40,7 +40,7 @@ const itemId=req.params.itemid;
     const cartItemDeleteQuery='delete from cart_items where id=?'
     await db.query(cartItemDeleteQuery,[itemId],(err,results)=>{
         if(err) {
-            return res.send("Error deleting")
+            return res.status(500).send("Error deleting")
         }
 
         if(results.affectedRows >0){
@@ -60,7 +60,7 @@ exports.updateCart=async(req,res)=>{
     await db.query(cartItemDeleteQuery,[productId],(err,results)=>{
         if (err) {
             console.error(err);
-            return res.status(500).send('Error updating quantity');
+            return res.status(500).status(500).send('Error updating quantity');
         }
 
         if (results.affectedRows > 0) {

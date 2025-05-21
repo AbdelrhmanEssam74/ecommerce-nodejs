@@ -10,8 +10,10 @@ exports.addProductFunction = async(req,res)=>{
 
     await db.query(insertProduct,[name ,description, price, brand, category, stock, average_rating, total_reviews, created_at, updated_at],(err,results)=>{
         if(err) 
-            {   console.error(err)
-                return  res.send("error occurs")}
+            {   
+                console.error(err)
+                return  res.send.status(500)("error occurs")
+            }
         if(results>0){
             return res.status("Cannot add this product, already added before !")
         }
