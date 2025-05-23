@@ -17,11 +17,12 @@ const cartItemsControllers=require('../Controllers/cartItems')
 const getWishlistItemsControllers=require('../Controllers/wishList')
 const ordersConterollers=require('../Controllers/orders')
 const profileControllers=require('../Controllers/profile')
+const {authMiddleware, checkAuthorize} = require("../middleware/auth");
 // ****************
 router.get('/', HomeController.home)
 
-router.post('/address', AddressController.address);
 router.get('/address/:userId', AddressController.getAddress);
+router.post('/address', AddressController.address);
 
 router.get('/shipping', ShippingController.getShippingOptions)
 

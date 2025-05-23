@@ -1,10 +1,10 @@
 const mysql = require('mysql2')
 console.time('db-connect');
 const connection = mysql.createConnection({
-    host: 'sql8.freesqldatabase.com',
-    user: 'sql8778978',
-    password: 'adeVXEaYDe',
-    database: 'sql8778978',
+    host: '193.203.168.147',
+    user: 'u679933726_ITIPHP',
+    password: 'Zi6o0V@3>5F!',
+    database: 'u679933726_ecommerce',
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
