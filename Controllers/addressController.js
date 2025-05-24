@@ -25,12 +25,13 @@ exports.address = async (req, res) => {
         });
 
 }
-exports.getAddress= async (req ,res)=>{
-    const userId  = req.params.userId
+exports.getAddress = async (req, res) => {
+    const userId = req.params.userId;
     try {
-        const [rows] = await db.query(`SELECT * FROM addresses WHERE user_id = ?`, [userId]);
+        const [rows] = await db.query('SELECT * FROM addresses WHERE user_id = ?', [userId]);
         return res.json(rows);
     } catch (err) {
-        return  res.status(500).json({ error: 'Error fetching addresses' });
+        console.error("Error fetching addresses:", err);
+        return res.status(500).json({ error: 'Error fetching addresses' });
     }
-}
+};
