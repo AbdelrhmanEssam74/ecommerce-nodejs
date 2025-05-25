@@ -1,90 +1,83 @@
 const db = require('../DB/db-connection')
 
-exports.loginFunction= async (req,res)=>{
-    const {email,password}=req.body;
-
-    const sql='select * from usertest where email=? and password=?'
-
-    await db.query(sql,[email,password],(err,results)=>{
-        if(err){ 
-            console.error(err)
-            return res.status(500).send("error occured")
-        }
-        
-        if(results.length>0){
-            req.session.user=results[0]
-            res.send(`Logged`)
-        }
-        else{
-            res.status(401).send("error credentials")
-        }
-    })
-    
+exports.registerFunction = async (req, res) => {
+    const {name, email, password, phone} = req.body;
+    const sqlCheck = 'SELECT * FROM users WHERE email = ?';
+    db.query(sqlCheck, [email])
+        .then(([results]) => {
+            if (results.length > 0) {
+                return res.status(403).json({error: 'Email already registered'});
+            } else {
+                const sqlInsert = 'INSERT INTO users (name, email, password, phone) VALUES (?, ?, ?, ?)';
+                return db.query(sqlInsert, [name, email, password, phone]);
+            }
+        })
+        .then(([result]) => {
+            res.status(201).json({
+                id: result.insertId,
+                message: 'User registered successfully'
+            });
+        })
+        .catch(err => {
+            console.error('🔴 Error registering user:', err);
+            res.status(500).json({error: 'Error registering user'});
+        });
 }
 
 
-exports.registerFunction=async (req,res)=>{
-
-    const {name,email,password}=req.body
-
-    const sqlCheck=`select * from usertest where email=?`
-    await db.query(sqlCheck,[email],(err,results)=>{
-        if(err) return res.status(500).send("error occured")
-        
-        if(results.length>0){
-            return res.status(403).send("email alreasy registered")
-        }
-        else{
-            const sqlInsert='insert into usertest(name,email,password,role) values(?,?,?,?)'
-            db.query(sqlInsert,[name,email,password,'user'],(err,results)=>{
-                if(err) return res.send("error sving user")
-                if(results===0){
-                   return res.send('user registered successfully ! 🎉')
-                }
-                else{
-                    return res.send("email email alreasy registered, go for login ")
-                }
-            })
-        }
-    })
-}
+exports.loginFunction = async (req, res) => {
+    const {email, password} = req.body;
+    const sqlCheck = 'SELECT * FROM users WHERE email = ? AND password = ?';
+    db.query(sqlCheck, [email, password])
+        .then(([results]) => {
+            if (results.length === 0) {
+                return res.status(401).json({error: 'Invalid email or password'});
+            } else {
+                const user = results[0];
+                res.status(200).json({
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    phone: user.phone
+                });
+            }
+        })
+        .catch(err => {
+            console.error('🔴 Error logging in:', err);
+            res.status(500).json({error: 'Error logging in'});
+        });
+};
 
 
-exports.forgetPassFunction=async (req,res)=>{
-    const {email}=req.body
+exports.forgetPassFunction = async (req, res) => {
+    const {email} = req.body
 
-    const sqlcheckPass='select * from usertest where email=?'
-    await db.query(sqlcheckPass,[email],(err,results)=>{
-        if(err) return res.status(500).send("email not found")
-        
-        if(results.length==0){
-             return res.status(404).send('this email is not registered before')
-        }
-        else{
-            res.send("email found successfully, u can now change ur password")
-        }
-    })
+    const sqlcheckPass = 'select * from users where email=?'
+    db.query(sqlcheckPass, [email])
+        .then(([results]) => {
+            if (results.length === 0) {
+                res.status(404).json({error:"email not found"})
+            }
+            res.json({success:"Reset link sent to your email!"})
+        })
+        .catch(err => {
+            console.error(' Error in forget password:', err);
+            res.status(500).json({error:"Error occurred while processing your request"})
+        })
 }
 
  exports.resetPassFunction=async (req,res)=>{
-    const {email,newpassword}=req.body;
-
-    const sqlUpdate='update usertest set password=? where email=?'
-
-    await db.query(sqlUpdate,[newpassword,email],(err,results)=>{
-        if(err) return res.status(500).send("error occured!")
-        
-        if(results.affectedRows===0){
-            res.status(404).send ('error resetting password')
-        }
-        return res.send('password updated successfully!')
-    })
-}
-
-
-exports.getProfile=async (req,res)=>{
-    if(req.session.user){ 
-        res.send(`Hi ${req.session.user.name} with email ${req.session.user.email} 🤞` )
-    }
-    else{res.status(401).send("return to login")}
+    const {email,newPassword}=req.body;
+    const sqlUpdate = 'UPDATE users SET password = ? WHERE email = ?';
+    db.query(sqlUpdate, [newPassword,  email])
+        .then(([result]) => {
+            if (result.affectedRows === 0) {
+                return res.status(404).json({error: 'Email not found'});
+            }
+            res.status(200).json({message: 'Password updated successfully'});
+        })
+        .catch(err => {
+            console.error('Error updating password:', err);
+            res.status(500).json({error: 'Error updating password'});
+        });
 }

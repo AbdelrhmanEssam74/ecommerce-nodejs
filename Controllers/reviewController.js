@@ -1,56 +1,64 @@
 const db = require('../DB/db-connection')
 
-exports.addReview = async (req, res) => {
-    const {userId, productId, rating, comment} = req.body
-
+exports.addReview = (req, res) => {
+    const { userId, productId, rating, comment } = req.body;
 
     if (!userId || !productId || !rating) {
-        return res.status(400).json({status: 400, error: 'userId, productId, and rating are required'});
+        return res.status(400).json({ status: 400, error: 'userId, productId, and rating are required' });
     }
 
-    try {
-        await db.query(
-            `insert into reviews (user_id, product_id, rating, comment)
-             values (?, ?, ?, ?)`,
-            [userId, productId, rating, comment]
-        );
+    const insertReviewQuery = `
+        INSERT INTO reviews (user_id, product_id, rating, comment)
+        VALUES (?, ?, ?, ?)
+    `;
+    const getAverageQuery = `
+        SELECT AVG(rating) AS avgRating, COUNT(*) AS total
+        FROM reviews
+        WHERE product_id = ?
+    `;
+    const updateProductQuery = `
+        UPDATE products
+        SET average_rating = ?, total_reviews = ?
+        WHERE id = ?
+    `;
 
-        const [avg] = await db.query(
-            `select avg(rating) as avgRating, COUNT(*) as total
-             from reviews
-             where product_id = ?`,
-            [productId]
-        );
-
-        await db.query(
-            `update products
-             set average_rating = ?,
-                 total_reviews  = ?
-             where id = ?`,
-            [avg[0].avgRating, avg[0].total, productId]
-        );
-
-        res.status(201).json({status: 201, message: ' Review submitted successfully'});
-
-    } catch (err) {
-        res.status(500).json({status: 500, error: 'Error submitting review'});
-    }
-}
-
-exports.getProductReviews = async (req, res) => {
-    const productId = req.params.productId;
-    try {
-        const [reviews] = await db.query(
-            `select r.rating, r.comment, r.created_at, u.name as user_name
-             from reviews r
-                      join users u on r.user_id = u.id
-             where r.product_id = ?
-             order by r.created_at desc `,
-            [productId]
-        );
-
-        res.json(reviews);
-    } catch (err) {
-        res.status(500).json({status: 500, error: 'Failed to get reviews'});
-    }
+    db.query(insertReviewQuery, [userId, productId, rating, comment])
+        .then(() => {
+            return db.query(getAverageQuery, [productId]);
+        })
+        .then(([avgResult]) => {
+            const avgRating = avgResult[0].avgRating;
+            const totalReviews = avgResult[0].total;
+            return db.query(updateProductQuery, [avgRating, totalReviews, productId]);
+        })
+        .then(() => {
+            res.status(201).json({ status: 201, message: 'Review submitted successfully' });
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ status: 500, error: 'Error submitting review' });
+        });
 };
+
+
+exports.getProductReviews = (req, res) => {
+    const productId = req.params.productId;
+
+    const getReviewsQuery = `
+        SELECT r.rating, r.comment, r.created_at, u.name AS user_name
+        FROM reviews r
+        JOIN users u ON r.user_id = u.id
+        WHERE r.product_id = ?
+        ORDER BY r.created_at DESC
+    `;
+
+    db.query(getReviewsQuery, [productId])
+        .then(([reviews]) => {
+            res.json(reviews);
+        })
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ status: 500, error: 'Failed to get reviews' });
+        });
+};
+
