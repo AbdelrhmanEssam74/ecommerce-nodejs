@@ -2,15 +2,63 @@ const db = require('../DB/db-connection')
 
 
 exports.getProducts = async (req, res) => {
-    const sql = 'SELECT * FROM products';
-    await db.query(sql).then(([results]) => {
-        if (results.length > 0) {
-            return res.json(results);
-        } else {
-            return res.status(404).json("No products found");
-        }
-    })
-}
+    const sql = `
+        SELECT 
+            p.id,
+            p.name,
+            p.description,
+            p.price,
+            p.brand,
+            p.category,
+            p.stock,
+            p.average_rating,
+            p.total_reviews,
+            pi.image_url
+        FROM 
+            products p
+        LEFT JOIN 
+            product_images pi ON p.id = pi.product_id
+    `;
+
+    await db.query(sql)
+        .then(([results]) => {
+            if (results.length === 0) {
+                return res.status(404).json({ message: "No products found" });
+            }
+
+            // Grouping products with multiple images
+            const productsMap = {};
+
+            results.forEach(row => {
+                if (!productsMap[row.id]) {
+                    productsMap[row.id] = {
+                        id: row.id,
+                        name: row.name,
+                        description: row.description,
+                        price: row.price,
+                        brand: row.brand,
+                        category: row.category,
+                        stock: row.stock,
+                        average_rating: row.average_rating,
+                        total_reviews: row.total_reviews,
+                        images: []
+                    };
+                }
+
+                if (row.image_url) {
+                    productsMap[row.id].images.push(row.image_url);
+                }
+            });
+
+            const products = Object.values(productsMap);
+            return res.status(200).json(products);
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).json({ message: "Error retrieving products" });
+        });
+};
+
 exports.addProductFunction = async (req, res) => {
     // Expected JSON body:
     // {
@@ -96,36 +144,33 @@ exports.filteringProducts = (req, res) => {
 exports.selctingProductWithItsId = async (req, res) => {
     const productId = req.params.id;
 
-    const productQuery = 'select * from products where id=?'
-    const imagesQuery = 'select image_url from product_images where product_id=?'
+    const productQuery = 'SELECT * FROM products WHERE id = ?';
+    const imagesQuery = 'SELECT image_url FROM product_images WHERE product_id = ?';
 
-    db.query(productQuery, [productId], (prodErr, productResults) => {
-        if (prodErr) {
-            console.error(prodErr)
-            return res.status(500).json('error in product')
-        }
-        if (productResults.length === 0) {
-            res.status(404).json("error gettting the product")
-        }
-
-
-        const product = productResults[0]
-
-        db.query(imagesQuery, [productId], (imgErr, imgResults) => {
-            if (imgErr) {
-                console.error(imgErr)
-                return res.json("error in image")
+    db.query(productQuery, [productId])
+        .then(([productResults]) => {
+            if (productResults.length === 0) {
+                return res.status(404).json({ message: 'Product not found' });
             }
 
-            const images = imgResults.map(img => img.image_url)
+            const product = productResults[0];
 
-            res.json({
-                ...product,
-                images: images
-            })
+            return db.query(imagesQuery, [productId])
+                .then(([imgResults]) => {
+                    const images = imgResults.map(img => img.image_url);
+
+                    return res.status(200).json({
+                        ...product,
+                        images: images
+                    });
+                });
         })
-    })
-}
+        .catch(err => {
+            console.error(err);
+            res.status(500).json({ message: 'Error retrieving product or images' });
+        });
+};
+
 
 
 
