@@ -1,0 +1,29 @@
+{
+  "name": "admin-panel",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mysql2": "^3.14.1",
+    "paypal-rest-sdk": "^1.8.1",
+    "paypal-server-sdk": "^0.0.1-security",
+    "sequelize": "^6.37.7"
+  },
+  "devDependencies": {
+    "chalk": "^5.4.1",
+    "nodemon": "^3.1.10"
+  }
+}

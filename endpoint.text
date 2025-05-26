@@ -1,0 +1,60 @@
+Add a New Address
+/api/address
+{
+  "userId": 1,
+  "full_name": "abdo",
+  "street": "123 cairo",
+  "city": "cairo",
+  "postal_code": "62701",
+  "country": "EG",
+  "type": "shipping",
+  "phone": "123-456-7890"
+}
+
+get all addresses for a user
+/api/address/id
+
+get all shipping
+/api/address/shipping
+
+
+checkout and order
+api/checkout
+{
+  "userId": 1,
+  "cartItems": [
+    { "productId": 1, "quantity": 2 },
+    { "productId": 3, "quantity": 1 }
+  ],
+  "addressId": 5,
+  "shippingOptionId": 2,
+  "paymentMethod": "PayPal"
+}
+
+get all orders for a user
+/api/order/:userId
+
+get all details for a specific order
+/api/order/:orderId
+
+Create PayPal Order
+/api/paypal/create-order
+{
+  "orderId": 5
+}
+
+add review
+
+/api/reviews
+{
+  "userId": 1,
+  "productId": 3,
+  "rating": 5,
+  "comment": "Great quality and fast delivery!"
+}
+
+get all reviews for a product
+/api/reviews/3
+
+search products
+/api/products/search?q=watch

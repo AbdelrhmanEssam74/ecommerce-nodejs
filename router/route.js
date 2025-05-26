@@ -12,16 +12,17 @@ const productController = require('../Controllers/searchController');
 // ***********************
 const authenticationAndAuthorizationControllers=require('../Controllers/authenticationAndAuthorization');
 const dashboardControllers=require('../Controllers/dashboard')
-const productsController=require('../Controllers/products')
-const cartItemsControllers=require('../Controllers/cartItems')
-const getWishlistItemsControllers=require('../Controllers/wishList')
+const productsController=require('../Controllers/productsController')
+const cartItemsControllers=require('../Controllers/cartController')
+const getWishlistItemsControllers=require('../Controllers/wishListController')
 const ordersConterollers=require('../Controllers/orders')
 const profileControllers=require('../Controllers/profile')
+const {authMiddleware, checkAuthorize} = require("../middleware/auth");
 // ****************
 router.get('/', HomeController.home)
 
-router.post('/address', AddressController.address);
 router.get('/address/:userId', AddressController.getAddress);
+router.post('/address', AddressController.address);
 
 router.get('/shipping', ShippingController.getShippingOptions)
 
@@ -42,34 +43,35 @@ router.get('/products/search', productController.searchProducts);
 router.post('/login',authenticationAndAuthorizationControllers.loginFunction)
 router.post('/register',authenticationAndAuthorizationControllers.registerFunction)
 router.post('/forget-pass',authenticationAndAuthorizationControllers.forgetPassFunction)
-router.put('/reset-pass',authenticationAndAuthorizationControllers.resetPassFunction)
-router.get('/dashboard',authMiddleware,checkAuthorize,dashboardControllers.getDashboard)
-router.get('/profile',authenticationAndAuthorizationControllers.getProfile)
+router.post('/reset-pass',authenticationAndAuthorizationControllers.resetPassFunction)
+// router.get('/dashboard',authMiddleware,checkAuthorize,dashboardControllers.getDashboard)
 
 
-router.post('/products',productsController.addProductFunction)
-router.post('/product-images',productsController.addProductImages)
-router.get('/filtered-products',productsController.filteringProducts)
+// ***************************************
+router.get('/products',productsController.getProducts)
+router.post('/products/add',productsController.addProductFunction)
+// router.post('/product-images',productsController.addProductImages)
+router.get('/products/filter',productsController.filteringProducts)
 router.get('/product/:id',productsController.selctingProductWithItsId)
 
+// ***************************************
+router.get('/cart/:uid',cartItemsControllers.getCartItems)
+router.post('/cart/add',cartItemsControllers.addItemToCart)
+router.delete('/cart/delete/:itemId',cartItemsControllers.deleteFromCart)
+router.put('/cart/update/:itemId',cartItemsControllers.updateCart)
 
-router.get('/cartItems/:uid',cartItemsControllers.getCartItems)
-router.post('/cartItems',cartItemsControllers.addItemToCart)
-router.delete('/cartItemsDelete/:itemid',cartItemsControllers.deleteFromCart)
-router.put('/cartItems/increase/:productid',cartItemsControllers.updateCart)
-
-
+// ***************************************
 router.get('/wishlist/:uid',getWishlistItemsControllers.getWishlistItems)
-router.post('/wishlist',getWishlistItemsControllers.addItemToWishList)
-router.delete('/wishlistDelete/:itemid',getWishlistItemsControllers.removeItemFromWishList)
+router.post('/wishlist/add',getWishlistItemsControllers.addItemToWishList)
+router.delete('/wishlist/delete/:itemid',getWishlistItemsControllers.removeItemFromWishList)
 
 
-router.get('/orders',ordersConterollers.getALlOrders)
-router.delete('/orders/:uid',ordersConterollers.deletelOrder)
-router.patch('/orders/:id/address',ordersConterollers.editOrdershippingAddress)
-router.patch('/orders/:id/option',ordersConterollers.editOrdershippingOption)
-router.patch('/orders/:id/paymentmethod',ordersConterollers.updateOrderPaymentMethod)
-router.delete('/orders/:id/delete',ordersConterollers.cancelOrder)
+// router.get('/orders',ordersConterollers.getALlOrders)
+// router.delete('/orders/:uid',ordersConterollers.deletelOrder)
+// router.patch('/orders/:id/address',ordersConterollers.editOrdershippingAddress)
+// router.patch('/orders/:id/option',ordersConterollers.editOrdershippingOption)
+// router.patch('/orders/:id/paymentmethod',ordersConterollers.updateOrderPaymentMethod)
+// router.delete('/orders/:id/delete',ordersConterollers.cancelOrder)
 
 
 router.patch('/profile/update',profileControllers.updateProfile)
