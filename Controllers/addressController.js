@@ -7,12 +7,12 @@ const {use} = require("express/lib/application");
  */
 
 exports.address = async (req, res) => {
-    const { userId, full_name, street, city,  postal_code, country, type, phone } = req.body;
+    const { userId, full_name, street, city,  postal_code,   phone } = req.body;
 
     const sql = `INSERT INTO addresses 
-    (user_id, full_name, street, city,  postal_code, country, type, phone) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`;
-    db.query(sql, [userId, full_name, street, city,  postal_code, country, type, phone])
+    (user_id, full_name, street, city,  postal_code,   phone) 
+    VALUES (?, ?, ?,  ?, ?, ?)`;
+    db.query(sql, [userId, full_name, street, city,  postal_code,   phone])
         .then(([result]) => {
             res.status(201).json({
                 id: result.insertId,

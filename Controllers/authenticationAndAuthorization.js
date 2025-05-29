@@ -1,51 +1,70 @@
 const db = require('../DB/db-connection')
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+// Register User
 exports.registerFunction = async (req, res) => {
-    const {name, email, password, phone} = req.body;
+  const { name, email, password, phone } = req.body;
+
+  try {
     const sqlCheck = 'SELECT * FROM users WHERE email = ?';
-    db.query(sqlCheck, [email])
-        .then(([results]) => {
-            if (results.length > 0) {
-                return res.status(403).json({error: 'Email already registered'});
-            } else {
-                const sqlInsert = 'INSERT INTO users (name, email, password, phone) VALUES (?, ?, ?, ?)';
-                return db.query(sqlInsert, [name, email, password, phone]);
-            }
-        })
-        .then(([result]) => {
-            res.status(201).json({
-                id: result.insertId,
-                message: 'User registered successfully'
-            });
-        })
-        .catch(err => {
-            console.error('🔴 Error registering user:', err);
-            res.status(500).json({error: 'Error registering user'});
-        });
-}
+    const [existingUsers] = await db.query(sqlCheck, [email]);
+
+    if (existingUsers.length > 0) {
+      return res.status(403).json({ error: 'Email already registered' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const sqlInsert = 'INSERT INTO users (name, email, password, phone) VALUES (?, ?, ?, ?)';
+    const [result] = await db.query(sqlInsert, [name, email, hashedPassword, phone]);
+
+    return res.status(201).json({
+      id: result.insertId,
+      message: 'User registered successfully'
+    });
+
+  } catch (err) {
+    console.error('🔴 Error registering user:', err);
+    return res.status(500).json({ error: 'Error registering user' });
+  }
+};
 
 
 exports.loginFunction = async (req, res) => {
-    const {email, password} = req.body;
-    const sqlCheck = 'SELECT * FROM users WHERE email = ? AND password = ?';
-    db.query(sqlCheck, [email, password])
-        .then(([results]) => {
-            if (results.length === 0) {
-                return res.status(401).json({error: 'Invalid email or password'});
-            } else {
-                const user = results[0];
-                res.status(200).json({
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                    phone: user.phone
-                });
-            }
-        })
-        .catch(err => {
-            console.error('🔴 Error logging in:', err);
-            res.status(500).json({error: 'Error logging in'});
+    const { email, password } = req.body;
+
+    const sqlCheck = 'SELECT * FROM users WHERE email = ?';
+    try {
+        const [results] = await db.query(sqlCheck, [email]);
+
+        if (results.length === 0) {
+            return res.status(401).json({ error: 'Invalid email or password' });
+        }
+
+        const user = results[0];
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            'my-dev-secret', 
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).json({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            phone: user.phone,
+            token: token
         });
+
+    } catch (err) {
+        console.error('🔴 Error logging in:', err);
+        res.status(500).json({ error: 'Error logging in' });
+    }
 };
 
 
